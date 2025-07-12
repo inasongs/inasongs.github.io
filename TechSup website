@@ -1,0 +1,168 @@
+// App.jsx
+import React from "react";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import About from "./pages/About";
+import CalendarPage from "./pages/CalendarPage";
+import DiscussionBoard from "./pages/DiscussionBoard";
+
+export default function App() {
+  return (
+    <Router>
+      <div className="p-4">
+        <nav className="mb-4 flex gap-4">
+          <Link to="/">About Us</Link>
+          <Link to="/calendar">Calendar</Link>
+          <Link to="/discussion">Discussion Board</Link>
+        </nav>
+        <Routes>
+          <Route path="/" element={<About />} />
+          <Route path="/calendar" element={<CalendarPage />} />
+          <Route path="/discussion" element={<DiscussionBoard />} />
+        </Routes>
+      </div>
+    </Router>
+  );
+} 
+
+// pages/About.jsx
+import React from "react";
+import logo from "../assets/techsup-logo.png"; // Replace with actual path
+
+export default function About() {
+  return (
+    <div className="max-w-3xl mx-auto text-center">
+      <img src={logo} alt="TechSup Logo" className="mx-auto w-48 mb-4" />
+      <h1 className="text-3xl font-bold mb-4">About Tech Support (TechSup)</h1>
+      <p>
+        Tech Support (TechSup) is a volunteering program where students with any
+        level of tech skills can come and help our seniors with various tech
+        issues, from help navigating a phone to suggesting solutions to
+        hardware/software problems with computer devices. Through this program,
+        students get the opportunity to not only offer help, but also create
+        valuable connections with our MI seniors.
+      </p>
+    </div>
+  );
+}
+
+// pages/CalendarPage.jsx
+import React, { useState } from "react";
+import Calendar from "react-calendar";
+import 'react-calendar/dist/Calendar.css';
+
+const address = "Mercer Island Library, 4400 88th Ave SE, Mercer Island, WA 98040";
+
+export default function CalendarPage() {
+  const [value, setValue] = useState(new Date());
+
+  const isTechSupportDay = (date) => {
+    const day = date.getDay();
+    return day === 1 || day === 6; // Monday or Saturday
+  };
+
+  const handleSignUp = () => {
+    alert("Thank you for signing up! We look forward to seeing you.");
+  };
+
+  return (
+    <div className="max-w-3xl mx-auto">
+      <h1 className="text-2xl font-bold mb-4 text-center">Upcoming Tech Support Sessions</h1>
+      <Calendar
+        onChange={setValue}
+        value={value}
+        tileDisabled={({ date }) => !isTechSupportDay(date)}
+      />
+      <p className="mt-4 text-center">
+        Location: <strong>{address}</strong>
+      </p>
+      <div className="text-center mt-4">
+        <button
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          onClick={handleSignUp}
+        >
+          Sign up for selected session
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// pages/DiscussionBoard.jsx
+import React, { useState } from "react";
+
+export default function DiscussionBoard() {
+  const [posts, setPosts] = useState([
+    {
+      id: 1,
+      name: "Elaine",
+      content: "My email won’t sync on my iPad.",
+      reactions: 2,
+      comments: ["Try deleting and re-adding your account."],
+    },
+  ]);
+  const [newPost, setNewPost] = useState("");
+
+  const handlePost = () => {
+    if (newPost.trim()) {
+      setPosts([...posts, { id: posts.length + 1, name: "Anonymous", content: newPost, reactions: 0, comments: [] }]);
+      setNewPost("");
+    }
+  };
+
+  const handleReaction = (id) => {
+    setPosts(posts.map(post => post.id === id ? { ...post, reactions: post.reactions + 1 } : post));
+  };
+
+  const handleComment = (id, comment) => {
+    setPosts(posts.map(post =>
+      post.id === id ? { ...post, comments: [...post.comments, comment] } : post
+    ));
+  };
+
+  return (
+    <div className="max-w-3xl mx-auto">
+      <h1 className="text-2xl font-bold mb-4 text-center">Case Discussion Board</h1>
+      <textarea
+        className="w-full p-2 border rounded mb-2"
+        placeholder="Describe your tech issue here..."
+        value={newPost}
+        onChange={(e) => setNewPost(e.target.value)}
+      ></textarea>
+      <button
+        className="bg-green-600 text-white px-4 py-2 rounded"
+        onClick={handlePost}
+      >
+        Post
+      </button>
+
+      <div className="mt-6 space-y-4">
+        {posts.map(post => (
+          <div key={post.id} className="border p-4 rounded shadow">
+            <p className="font-semibold">{post.name}:</p>
+            <p>{post.content}</p>
+            <p>👍 {post.reactions}</p>
+            <button
+              className="text-blue-500 mr-2"
+              onClick={() => handleReaction(post.id)}
+            >
+              React
+            </button>
+            {/* In production, wrap this section with volunteer authentication */}
+            <div className="mt-2">
+              <input
+                className="border p-1 rounded w-full"
+                placeholder="Add a volunteer comment..."
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleComment(post.id, e.target.value);
+                }}
+              />
+              {post.comments.map((c, i) => (
+                <p key={i} className="text-sm text-gray-700">💬 {c}</p>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
